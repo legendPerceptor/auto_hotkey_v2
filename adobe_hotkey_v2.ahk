@@ -2,6 +2,20 @@
 
 #SingleInstance Force
 
+#Hotif WinActive("ahk_class Photoshop")
+
+^Numpad9::
+{
+    quickExportJPGToLastLocation("2160")
+}
+
+^Numpad8::
+{
+    MsgBox("Photoshop is now active")
+}
+
+#Hotif ; End photoshop
+
 #Hotif WinActive("ahk_class Premiere Pro")
 
 ^!Numpad8::
@@ -483,4 +497,92 @@ ending:
     BlockInput("MouseMoveOff")
     ToolTip("")
 monoEnding:
+}
+
+waitForColor(color, delay := 10) {
+    waiting := 0
+    loop {
+        waiting++
+        Sleep(50)
+
+        MouseGetPos(&MouseX, &MouseY)
+        thecolor := PixelGetColor(MouseX, MouseY)
+        ToolTip("waiting = " waiting "`npixel color = " thecolor)
+        if (thecolor = color) {
+            ToolTip("COLOR WAS FOUND")
+            return true
+        }
+        if (waiting > delay) {
+            ToolTip("no color found, go to ending")
+            return false
+        }
+    }
+}
+
+quickExportJPGToLastLocation(width) {
+    CoordMode("Mouse", "Screen")
+    CoordMode("Pixel", "Screen")
+
+    MouseGetPos(&xPosOrg, &yPosOrg)
+    BlockInput("On")
+    BlockInput("MouseMove")
+
+    Send("{F10}") ; call out the export as window
+
+    export_x := 1631
+    export_y := 898
+
+    MouseMove(export_x, export_y, 0)
+
+    result := waitForColor('0x0D66D0', 100)
+    if not result { ; if cannot find the color for a while
+        goto ending
+    }
+
+    image_width_textbox_x := 1493
+    image_width_textbox_y := 319
+
+    MouseMove(image_width_textbox_x, image_width_textbox_y, 0) ; Move to the Width text box
+    MouseClick('Left') ; Click the button to get focus
+    Sleep(20)
+    Send("^a") ; Select All
+    Sleep(100)
+    Send(width) ; Set the width to be 2160
+    Sleep(100)
+    MouseClick('Left', 1530, 271) ; Click out of the text box, to apply resolution
+    Sleep(20)
+
+    MouseMove(export_x, export_y)
+    Sleep(20)
+    result := waitForColor('0x0D66D0', 100)
+    if not result { ; if cannot find the color for a while
+        goto ending
+    }
+
+    MouseClickDrag('Left', 1570, 219, 1605, 219, 2) ; Set the JPEG quality of be 7 by draging the slider
+
+    MouseMove(export_x, export_y, 0)
+
+    result := waitForColor('0x0D66D0')
+    if not result { ; if cannot find the color for a while
+        goto ending
+    }
+
+    MouseClick('Left')
+
+    MouseMove(1273, 617) ; The Save button position
+
+    result := waitForColor('0xE0EEF9')
+    if not result { ; if cannot find the color for a while
+        goto ending
+    }
+
+    MouseClick('Left')
+ending:
+    CoordMode("Mouse", "Screen")
+    CoordMode("Pixel", "Screen")
+    MouseMove(xPosOrg, yPosOrg, 0)
+    BlockInput("Off")
+    BlockInput("MouseMoveOff")
+    ToolTip("")
 }

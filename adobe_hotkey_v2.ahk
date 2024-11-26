@@ -3,6 +3,17 @@
 #SingleInstance Force
 
 #Hotif WinActive("ahk_class Premiere Pro")
+
+^!Numpad8::
+{
+    audioMonoMaker("left")
+}
+
+^!Numpad9::
+{
+    audioMonoMaker("right")
+}
+
 ;Ripple delete clip at playhead!! This was the first AHK script I ever wrote, I think!
 ^!Numpad1::
 {
@@ -76,16 +87,19 @@ GroupAdd "yuanjianexploreres", "ahk_class CabinetWClass"
 {
     if (!WinExist("ahk_class Premiere Pro")) {
         Run "Adobe Premiere Pro.exe"
+    } else if (!WinActivate("ahk_class Premiere Pro")) {
+        WinActivate "ahk_class Premiere Pro"
     }
-    WinActivate "ahk_class Premiere Pro"
+
 }
 
 ^Numpad4::
 {
     if (!WinExist("ahk_exe Code.exe")) {
         Run "Code.exe"
+    } else if (!WinActivate("ahk_exe Code.exe")) {
+        WinActivate "ahk_exe Code.exe"
     }
-    WinActivate "ahk_exe Code.exe"
 }
 
 ; Adobe Premiere Pro Functions
@@ -375,3 +389,98 @@ preset(item) {
 theEnding:
 }
 ;END of preset(). The two lines above this one are super important.
+
+audioMonoMaker(track) {
+    if !WinActive("ahk_exe Adobe Premiere Pro.exe") {
+        goto monoEnding
+    }
+    Sleep(3)
+
+    CoordMode("Mouse", "Screen")
+    CoordMode("Pixel", "Screen")
+
+    BlockInput("On")
+    BlockInput("MouseMove")
+
+    global tToggle := 1
+    addPixels := 0
+    if (track = "right") {
+        addPixels := 23 ; right check box is 23 pixels to the right in the Client coordinate system.
+    } else if (track = "left") {
+        addPixels := 0
+    }
+
+    Send("{F3}") ; The audio channels shortcut, default is shift + G in Premiere. Modifier key not reliable in Send().
+    Sleep(15)
+
+    MouseGetPos(&xPosAudio, &yPosAudio)
+    ; MsgBox("Audio Mouse Pos X, Y: {" xPosAudio ", " yPosAudio "}")
+    MouseMove(1129, 833, 0) ; Find the OK button position
+    Sleep(15)
+
+    MouseGetPos(&MouseX, &MouseY)
+    ; MsgBox("Current Mouse X, Y: {" MouseX ", " MouseY "}")
+    waiting := 0
+
+    ; If the mouse is hovering over the OK button, the color should be E8E8E8.
+    loop {
+        waiting++
+        Sleep(50)
+
+        MouseGetPos(&MouseX, &MouseY)
+        thecolor := PixelGetColor(MouseX, MouseY)
+        ToolTip("waiting = " waiting "`npixel color = " thecolor)
+        if (thecolor = "0xE8E8E8") {
+            ToolTip("COLOR WAS FOUND")
+            break
+        }
+        if (waiting > 10) {
+            ToolTip("no color found, go to ending")
+            goto ending
+        }
+    }
+
+    CoordMode("Mouse", "Client")
+    CoordMode("Pixel", "Client")
+
+    MouseMove(110 + addPixels, 201, 0)
+    Sleep(50)
+
+    MouseGetPos(&Xkolor, &Ykolor)
+    Sleep(50)
+    kolor := PixelGetColor(Xkolor, Ykolor)
+
+    if (kolor = "0x1d1d1d" || kolor = "0x333333") {
+        MouseClick("left")
+        Sleep(10)
+    } else if (kolor = "0xb9b9b9") {
+        ; Do nothing, checkbox already checked
+    }
+
+    Sleep(5)
+    MouseMove(110 + addPixels, 224, 0)
+    Sleep(30)
+
+    MouseGetPos(&Xkolor2, &Ykolor2)
+    Sleep(10)
+    k2 := PixelGetColor(Xkolor2, Ykolor2)
+    Sleep(30)
+
+    if (k2 = "0x1d1d1d" || k2 = "0x333333") {
+        MouseClick("left")
+        Sleep(10)
+    } else if (k2 = "0xb9b9b9") {
+        ; Do nothing, checkbox already checked
+    }
+
+    Sleep(5)
+    Send("{Enter}")
+ending:
+    CoordMode("Mouse", "Screen")
+    CoordMode("Pixel", "Screen")
+    MouseMove(xPosAudio, yPosAudio, 0)
+    BlockInput("Off")
+    BlockInput("MouseMoveOff")
+    ToolTip("")
+monoEnding:
+}

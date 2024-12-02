@@ -499,7 +499,7 @@ ending:
 monoEnding:
 }
 
-waitForColor(color, delay := 10) {
+waitForColor(color, delay := 10, color_option2 := "") {
     waiting := 0
     MouseGetPos(&MouseXorg, &MouseYorg)
     loop {
@@ -509,7 +509,7 @@ waitForColor(color, delay := 10) {
         MouseGetPos(&MouseX, &MouseY)
         thecolor := PixelGetColor(MouseX, MouseY)
         ToolTip("waiting = " waiting "`npixel color = " thecolor "MousePos: " MouseX ", " MouseY)
-        if (thecolor = color) {
+        if (thecolor == color || (color_option2 != "" && thecolor == color_option2)) {
             ToolTip("COLOR WAS FOUND")
             MouseMove(MouseXorg, MouseYorg)
             return true
@@ -538,7 +538,7 @@ quickExportJPGToLastLocation(width) {
 
     MouseMove(export_x, export_y, 0)
 
-    result := waitForColor('0x0D66D0', 100)
+    result := waitForColor('0x0D66D0', 100, '0x1473E6')
     if not result { ; if cannot find the color for a while
         goto ending
     }
@@ -558,7 +558,7 @@ quickExportJPGToLastLocation(width) {
 
     MouseMove(export_x, export_y)
     Sleep(20)
-    result := waitForColor('0x0D66D0', 100)
+    result := waitForColor('0x0D66D0', 100, '0x1473E6')
     if not result { ; if cannot find the color for a while
         goto ending
     }
@@ -567,7 +567,7 @@ quickExportJPGToLastLocation(width) {
 
     MouseMove(export_x, export_y, 0)
 
-    result := waitForColor('0x0D66D0')
+    result := waitForColor('0x0D66D0', 100, '0x1473E6')
     if not result { ; if cannot find the color for a while
         goto ending
     }
@@ -576,7 +576,7 @@ quickExportJPGToLastLocation(width) {
 
     MouseMove(1273, 617) ; The Save button position
 
-    result := waitForColor('0xE0EEF9')
+    result := waitForColor('0xE0EEF9', 20)
     if not result { ; if cannot find the color for a while
         goto ending
     }

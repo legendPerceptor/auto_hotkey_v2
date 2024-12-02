@@ -501,19 +501,22 @@ monoEnding:
 
 waitForColor(color, delay := 10) {
     waiting := 0
+    MouseGetPos(&MouseXorg, &MouseYorg)
     loop {
         waiting++
         Sleep(50)
-
+        MouseMove(MouseXorg + Random(-1, 1), MouseYorg + Random(-1, 1))
         MouseGetPos(&MouseX, &MouseY)
         thecolor := PixelGetColor(MouseX, MouseY)
-        ToolTip("waiting = " waiting "`npixel color = " thecolor)
+        ToolTip("waiting = " waiting "`npixel color = " thecolor "MousePos: " MouseX ", " MouseY)
         if (thecolor = color) {
             ToolTip("COLOR WAS FOUND")
+            MouseMove(MouseXorg, MouseYorg)
             return true
         }
         if (waiting > delay) {
             ToolTip("no color found, go to ending")
+            MouseMove(MouseXorg, MouseYorg)
             return false
         }
     }
@@ -527,6 +530,7 @@ quickExportJPGToLastLocation(width) {
     BlockInput("On")
     BlockInput("MouseMove")
 
+    WinActivate("ahk_class Photoshop")
     Send("{F10}") ; call out the export as window
 
     export_x := 1631

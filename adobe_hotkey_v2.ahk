@@ -563,9 +563,12 @@ quickExportJPGToLastLocation(width) {
         goto ending
     }
 
-    MouseClickDrag('Left', 1570, 219, 1605, 219, 2) ; Set the JPEG quality of be 7 by draging the slider
+    ; MouseClickDrag('Left', 1570, 219, 1605, 219, 2) ; Set the JPEG quality of be 7 by draging the slider
+    MouseMove(1599, 216)
+    MouseClick('Left')
+    Sleep(30)
 
-    MouseMove(export_x, export_y, 0)
+    MouseMove(export_x, export_y, 30)
 
     result := waitForColor('0x0D66D0', 100, '0x1473E6')
     if not result { ; if cannot find the color for a while
@@ -576,7 +579,7 @@ quickExportJPGToLastLocation(width) {
 
     MouseMove(1273, 617) ; The Save button position
 
-    result := waitForColor('0xE0EEF9', 20)
+    result := waitForColor('0xE0EEF9', 40)
     if not result { ; if cannot find the color for a while
         goto ending
     }
